@@ -1,0 +1,186 @@
+Name:         translator-auto
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+API Version:  ray.io/v1alpha1
+Kind:         RayService
+Metadata:
+  Creation Timestamp:  2023-07-06T17:57:59Z
+  Generation:          1
+  Resource Version:    124527128
+  UID:                 37ac1440-567b-43c5-b39a-cb248b868bf8
+Spec:
+  Deployment Unhealthy Second Threshold:  300
+  Ray Cluster Config:
+    Autoscaler Options:
+      Env:
+      Env From:
+      Idle Timeout Seconds:  60
+      Image Pull Policy:     IfNotPresent
+      Resources:
+        Limits:
+          Cpu:     900m
+          Memory:  1000Mi
+        Requests:
+          Cpu:     900m
+          Memory:  1000Mi
+      Security Context:
+      Upscaling Mode:            Default
+    Enable In Tree Autoscaling:  true
+    Head Group Spec:
+      Ray Start Params:
+        Dashboard - Host:  0.0.0.0
+      Service Type:        ClusterIP
+      Template:
+        Spec:
+          Containers:
+            Image:  rayproject/ray:2.5.0
+            Lifecycle:
+              Pre Stop:
+                Exec:
+                  Command:
+                    /bin/sh
+                    -c
+                    ray stop
+            Name:  ray-head
+            Ports:
+              Container Port:  6379
+              Name:            gcs-server
+              Protocol:        TCP
+              Container Port:  8265
+              Name:            dashboard
+              Protocol:        TCP
+              Container Port:  10001
+              Name:            client
+              Protocol:        TCP
+              Container Port:  8000
+              Name:            serve
+              Protocol:        TCP
+            Resources:
+              Limits:
+                Cpu:     3
+                Memory:  2.5G
+              Requests:
+                Cpu:     500m
+                Memory:  2G
+          Tolerations:
+            Effect:    NoSchedule
+            Key:       sku
+            Operator:  Equal
+            Value:     gpu
+    Ray Version:       2.5.0
+    Worker Group Specs:
+      Group Name:    small-group
+      Max Replicas:  10
+      Min Replicas:  2
+      Ray Start Params:
+      Replicas:  2
+      Template:
+        Spec:
+          Containers:
+            Image:  rayproject/ray:2.5.0
+            Lifecycle:
+              Pre Stop:
+                Exec:
+                  Command:
+                    /bin/sh
+                    -c
+                    ray stop
+            Name:  ray-worker
+            Resources:
+              Limits:
+                Cpu:     2
+                Memory:  2G
+              Requests:
+                Cpu:     500m
+                Memory:  1G
+          Tolerations:
+            Effect:    NoSchedule
+            Key:       sku
+            Operator:  Equal
+            Value:     gpu
+  Serve Config:
+    Deployments:
+      Name:  Translator
+      Ray Actor Options:
+        Num Cpus:  0.5
+    Import Path:   autoscale1.translator_app
+    Runtime Env:   {"working_dir": "https://github.com/Rowena2001/Final_Deployments/archive/refs/tags/1.2.zip", 
+"pip": ["ray[default]", "torch==1.13.1", "transformers==4.30.2", "accelerate==0.20.3"]}
+
+  Service Unhealthy Second Threshold:  300
+Status:
+  Active Service Status:
+    App Status:
+      Health Last Update Time:  2023-07-07T05:32:38Z
+      Last Update Time:         2023-07-07T05:39:36Z
+      Status:                   NOT_STARTED
+    Dashboard Status:
+      Health Last Update Time:  2023-07-07T05:39:36Z
+      Is Healthy:               true
+      Last Update Time:         2023-07-07T05:39:36Z
+    Ray Cluster Name:           translator-auto-raycluster-bphfx
+    Ray Cluster Status:
+      Available Worker Replicas:  2
+      Desired Worker Replicas:    2
+      Endpoints:
+        Client:             10001
+        Dashboard:          8265
+        Dashboard - Agent:  52365
+        Gcs - Server:       6379
+        Metrics:            8080
+        Serve:              8000
+      Head:
+        Pod IP:             10.244.2.177
+        Service IP:         10.0.88.16
+      Last Update Time:     2023-07-07T05:39:32Z
+      Max Worker Replicas:  10
+      Min Worker Replicas:  2
+      Observed Generation:  1
+      State:                ready
+  Observed Generation:      1
+  Pending Service Status:
+    App Status:
+      Health Last Update Time:  2023-07-07T05:37:49Z
+      Last Update Time:         2023-07-07T05:39:36Z
+      Status:                   DEPLOYING
+    Dashboard Status:
+      Health Last Update Time:  2023-07-07T05:39:36Z
+      Is Healthy:               true
+      Last Update Time:         2023-07-07T05:39:36Z
+    Ray Cluster Name:           translator-auto-raycluster-q2hkq
+    Ray Cluster Status:
+      Head:
+    Serve Deployment Statuses:
+      Health Last Update Time:  2023-07-07T05:39:25Z
+      Last Update Time:         2023-07-07T05:39:36Z
+      Name:                     default_Translator
+      Status:                   UPDATING
+  Service Status:               WaitForServeDeploymentReady
+Events:
+  Type    Reason                       Age                      From                   Message
+  ----    ------                       ----                     ----                   -------
+  Normal  Running                      12m (x14065 over 97m)    rayservice-controller  The Serve applicaton is now running and healthy.
+  Normal  ServiceNotReady              7m26s (x11 over 97m)     rayservice-controller  The service is not ready yet. Controller will perform a round of actions in 2s.
+  Normal  WaitForServeDeploymentReady  2m26s (x110 over 6m32s)  rayservice-controller  (combined from similar events): UpdateDeployments fail: 500 Internal Server Error Traceback (most recent call last):
+  File "/home/ray/anaconda3/lib/python3.7/site-packages/ray/dashboard/optional_utils.py", line 281, in decorator
+    return await f(self, *args, **kwargs)
+  File "/home/ray/anaconda3/lib/python3.7/site-packages/ray/dashboard/modules/serve/serve_agent.py", line 196, in put_all_deployments
+    "location": "EveryNode",
+  File "/home/ray/anaconda3/lib/python3.7/site-packages/ray/serve/_private/api.py", line 246, in serve_start_async
+    .remote(detached, http_options, dedicated_cpu, **kwargs)
+ray.exceptions.RayTaskError: ^[[36mray::_start_controller()^[[39m (pid=333, ip=10.244.2.176)
+  File "/home/ray/anaconda3/lib/python3.7/site-packages/ray/serve/_private/api.py", line 199, in _start_controller
+    proxy_handles = ray.get(controller.get_http_proxies.remote())
+ray.exceptions.RayActorError: The actor died because of an error raised in its creation task, ^[[36mray::SERVE_CONTROLLER_ACTOR:ServeController.__init__()^[[39m (pid=3731, ip=10.244.2.174, actor_id=97b3c9584e9fc0042e4eb1f801000000, repr=<ray.serve.controller.ServeController object at 0x7f0e8858c090>)
+  File "/home/ray/anaconda3/lib/python3.7/concurrent/futures/_base.py", line 428, in result
+    return self.__get_result()
+  File "/home/ray/anaconda3/lib/python3.7/concurrent/futures/_base.py", line 384, in __get_result
+    raise self._exception
+  File "/home/ray/anaconda3/lib/python3.7/site-packages/ray/serve/controller.py", line 140, in __init__
+    gcs_client,
+  File "/home/ray/anaconda3/lib/python3.7/site-packages/ray/serve/_private/http_state.py", line 172, in __init__
+    self._start_proxies_if_needed()
+  File "/home/ray/anaconda3/lib/python3.7/site-packages/ray/serve/_private/http_state.py", line 250, in _start_proxies_if_needed
+    proxy = ray.get_actor(name, namespace=SERVE_NAMESPACE)
+AssertionError

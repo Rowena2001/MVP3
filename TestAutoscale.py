@@ -3,7 +3,7 @@
 # python -m unittest -v TestAutoscale.py
 
 import unittest
-import autoscale_deployment
+import MVP3.autoscaling.autoscale_deployment as autoscale_deployment
 
 class TestAutoscale(unittest.TestCase):
        def setUp(self):
